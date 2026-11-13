@@ -1,0 +1,27 @@
+# Troubleshooting
+
+Start with the failing boundary and keep credentials and internal paths out of public reports.
+
+## API does not start
+
+A missing local-storage-service import is a known clean-checkout blocker in this baseline. Do not repair it through undocumented copy/paste code. Check [known limitations](/docs/project/known-limitations/) and coordinate a supported backend revision. For configuration errors, verify application `PGPASSWORD`, ports and `.env` loading.
+
+## Database ready, processing idle
+
+`/ready` checks PostgreSQL, not Redis, outbox dispatch, workers, binaries or storage. Confirm the publisher and worker processes are separately running and point at the same services. A healthy database alone cannot cause queued work to execute.
+
+## Upload rejected
+
+Check token type, expiration, prior consumption, exact Content-Length, registered size and raw-body MIME type. Read [streaming uploads](/docs/guides/streaming-mp4-uploads/). A `.mp4` extension does not establish a valid container; a valid container does not establish a decodable video stream.
+
+## Thumbnail unavailable
+
+Inspect the authorized asset's optional thumbnail status. A queued/processing job has not produced a deliverable JPEG. For failures, authorized operators should inspect worker logs for missing FFmpeg/FFprobe, corrupt input, timeouts, output limits or missing shared files. API and workers need compatible storage paths and access permissions.
+
+## Ambiguous finalization
+
+If the database becomes unreachable after file commit, the source preserves the file for reconciliation and returns an internal error when possible. Do not delete files or blindly retry the consumed token. Inspect authorized database/log state and coordinate recovery outside this public website.
+
+## Report a problem
+
+Record the selected commit, failing route/status/error, process role and a minimal sanitized reproduction. Remove keys, tokens, private media, connection strings and sensitive paths. See [contributing](/docs/project/contributing/) rather than assuming a support SLA or disclosure policy exists.

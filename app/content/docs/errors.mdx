@@ -1,0 +1,30 @@
+# Error handling
+
+Handle route-specific errors and uncertain outcomes rather than assuming every failure is retryable.
+
+## Response shapes
+
+Media and authentication failures commonly return a JSON object with `error` and `message`. Framework validation uses `validation_error`; unexpected internal errors are sanitized. Readiness uses a different status/checks object and returns 503 when its PostgreSQL check fails.
+
+```json
+{
+  "error": "unauthorized",
+  "message": "Missing or invalid API key authorization header"
+}
+```
+
+This is a source-defined example, not a captured runtime response. Diagnostic messages can differ by failing branch; prefer status plus error name for application decisions.
+
+## Classify before retrying
+
+- 400: check the relevant body, container or length constraint. Registration size validation is 400, unlike upload overflow (413).
+- 401/403: inspect credential type, expiry/revocation and project state; an upload token is not a project key.
+- 404: an asset/output is unavailable to the project, missing or not ready. Avoid probing other tenants.
+- 408/409/411/413/415: handle the upload-specific contract; blindly resending a consumed token is unsafe.
+- 500: an internal failure or ambiguous finalization can require investigation. A failed response does not always mean no state was committed.
+
+## Transport failures
+
+A dropped or timed-out connection can prevent delivery of the intended error JSON. Preserve your asset ID and inspect state using the project key before deciding to create a new registration. There is no verified public idempotency or upload-resume contract.
+
+Use each API page's error list: [registration](/docs/api/register-media/#errors), [upload](/docs/api/upload-media/#errors), [asset](/docs/api/get-media/#errors), [thumbnail](/docs/api/get-thumbnail/#errors). See [troubleshooting](/docs/guides/troubleshooting/) for operator boundaries.

@@ -1,0 +1,54 @@
+# GET media thumbnail
+
+GET /v1/media/:id/thumbnail streams the current JPEG to an authenticated project caller.
+
+## Request
+
+Use the asset ID from registration and a project API key via Bearer or `x-api-key`. No body or required request Content-Type. An upload token does not authorize retrieval.
+
+```bash
+curl --fail-with-body -sS \
+  'http://localhost:3000/v1/media/<asset-id>/thumbnail' \
+  -H 'Authorization: Bearer <project-api-key>' \
+  --output thumbnail.jpg
+```
+
+## Success response
+
+200 with a binary JPEG body, not JSON. The handler sets Content-Type from the output record (generated JPEGs use `image/jpeg`), Content-Length from the output byte count and `Cache-Control: private, max-age=86400`.
+
+```text
+HTTP/1.1 200 OK
+Content-Type: image/jpeg
+Content-Length: 12345
+Cache-Control: private, max-age=86400
+
+[binary JPEG bytes]
+```
+
+The header spelling/casing and 12345-byte size above are illustrative. No JSON response fields should be parsed from the image body. The URL is an authenticated route, not a signed public storage URL. Inspect [asset state](/docs/api/get-media/) before retrieving.
+
+## Errors
+
+<div className="docs-table" tabIndex={0} role="region" aria-label="Scrollable reference table">
+<table>
+<thead><tr><th scope="col">Status / error</th><th scope="col">Condition</th></tr></thead>
+<tbody><tr><td>401 <code>unauthorized</code></td><td>Missing/invalid project key; expired or revoked key.</td></tr><tr><td>403 <code>project_inactive</code></td><td>Key belongs to an inactive project.</td></tr><tr><td>500 <code>internal_error</code></td><td>Unexpected failure; internal details sanitized.</td></tr></tbody>
+</table>
+</div><div className="docs-table" tabIndex={0} role="region" aria-label="Scrollable reference table">
+<table>
+<thead><tr><th scope="col">Status / error</th><th scope="col">Condition</th></tr></thead>
+<tbody><tr><td>404 <code>thumbnail_not_found</code></td><td>No current accessible thumbnail, output not ready, inaccessible asset, or missing stored file.</td></tr></tbody>
+</table>
+</div>
+```json
+{
+  "error": "thumbnail_not_found",
+  "message": "Thumbnail not found or not ready for this media asset"
+}
+```
+
+
+A missing stored file uses the same error name with message `Thumbnail file is missing from storage`. The route does not return a 409 for a processing thumbnail; it returns 404. Malformed asset IDs can become sanitized 500s because no UUID parameter schema is declared. A stream failure after headers are sent can terminate the response instead of producing a clean JSON error.
+
+All values below are illustrative; examples were checked against source, not captured from a running backend. Replace IDs and credentials with your own authorized values. Review [onboarding blockers](/docs/project/known-limitations/) before executing requests.

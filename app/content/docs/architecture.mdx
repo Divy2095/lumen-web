@@ -1,0 +1,25 @@
+# System architecture
+
+Follow the boundaries between HTTP ingestion, durable state and asynchronous execution.
+
+## Request and storage boundary
+
+The Fastify API authenticates registration/retrieval requests, validates upload headers and streams MP4 bytes to a temporary file through an MP4 inspector. The source is committed to local storage before database finalization. The required storage implementation is missing from the inspected commit; see [known limitations](/docs/project/known-limitations/).
+
+Filesystem commit and PostgreSQL commit are not one atomic transaction. Route recovery checks database state after a finalization exception. It removes a confirmed orphan or preserves the final file when commit outcome is uncertain. An HTTP failure can therefore require investigation rather than a blind upload retry.
+
+## Durable dispatch
+
+In one PostgreSQL transaction, successful finalization marks the asset `ready`, inserts metadata and thumbnail jobs, and writes corresponding outbox events. A separate publisher leases unpublished events and sends them to the `media-processing` BullMQ queue in Redis. It marks publication only while it owns the lease.
+
+The design addresses the gap between saving database state and publishing a queue message. It does not establish an exactly-once execution guarantee. Duplicate delivery is handled with stable queue IDs and database job claims.
+
+## Worker execution
+
+Workers claim jobs using leases and fencing tokens, record attempts, then call FFprobe or FFmpeg. Completion/persistence is guarded by ownership checks. Queue retries and database attempt limits are bounded; source/tests demonstrate intended recovery behavior, not an operational SLA.
+
+Both API and workers need compatible access to the same local storage. Workers can probe duration independently for thumbnail work, so the thumbnail job is not strictly downstream of metadata completion. See [metadata](/docs/guides/metadata-extraction/) and [thumbnails](/docs/guides/thumbnails/).
+
+## Public delivery
+
+The authenticated thumbnail route streams the current JPEG. There is no current public webhook-completion contract or general job-management API. Health and readiness are separate: `/health` reports liveness; `/ready` checks PostgreSQL only.

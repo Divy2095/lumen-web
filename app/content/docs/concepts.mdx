@@ -1,0 +1,21 @@
+# Core concepts
+
+Separate ownership, ingestion and processing before integrating with the API.
+
+## Ownership and credentials
+
+A project owns media assets and API keys. The API-key lookup joins the key to its project, checks expiry and revocation, and rejects an inactive project. An asset from another project is unavailable to the caller.
+
+Your server uses the project API key. Registration returns a different, single-use upload token scoped to one asset. End users should never receive the project key. See [API-key authentication](/docs/guides/api-key-authentication/) and [upload-token authentication](/docs/guides/upload-token-authentication/).
+
+## Assets and jobs
+
+An asset represents the registered file and ingestion state. Registration creates `uploading`; successful ingestion changes it to `ready`. This does not mean that metadata or thumbnails have finished.
+
+Metadata extraction and thumbnail generation are separate jobs, each with attempts and worker ownership. A JPEG output has a storage record and current-version selection. A database state or operation enum does not imply that an HTTP endpoint exists to create, cancel or retry jobs.
+
+## Output state
+
+Use [asset retrieval](/docs/api/get-media/) to inspect the asset and optional thumbnail information. Queued and processing thumbnail jobs both appear as `thumbnail.status: "processing"`. The thumbnail member can be absent; do not interpret absence as success.
+
+Metadata is persisted internally. The committed public asset serializer does not include the full extracted metadata or a generic job list. Read [processing lifecycle](/docs/guides/processing/) before polling.

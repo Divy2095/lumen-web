@@ -1,0 +1,45 @@
+# GET ready
+
+GET /ready checks whether a bounded PostgreSQL query succeeds.
+
+## Request
+
+No authentication, body or special request headers are required.
+
+```bash
+curl -i http://localhost:3000/ready
+```
+
+## Success response
+
+200 JSON:
+
+```json
+{
+  "status": "ready",
+  "service": "lumen",
+  "checks": {
+    "database": "ok"
+  },
+  "timestamp": "2026-11-12T12:00:00.000Z"
+}
+```
+
+`status` and `service` are strings, `checks.database` describes the database result, and `timestamp` is a generated ISO string. Values above are illustrative. Cache-Control is `no-store, no-cache, must-revalidate, proxy-revalidate`.
+
+## Errors
+
+A failed PostgreSQL check returns **503**, using the readiness shape rather than the media error/message shape:
+
+```json
+{
+  "status": "not_ready",
+  "service": "lumen",
+  "checks": {
+    "database": "error"
+  },
+  "timestamp": "2026-11-12T12:00:00.000Z"
+}
+```
+
+The query is `SELECT 1` with a 2000ms query timeout. This endpoint does not inspect Redis, the publisher, workers, FFmpeg/FFprobe or local storage. A 200 does not establish an operational processing pipeline. Other unexpected failures use the application's central handling or may prevent a response entirely. No running backend was checked here.

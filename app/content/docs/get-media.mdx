@@ -1,0 +1,76 @@
+# GET media
+
+GET /v1/media/:id returns the project-owned asset and optional thumbnail availability.
+
+## Request
+
+The ID is the asset ID from registration. A project API key is required via Bearer or `x-api-key`. No request body or special Content-Type is required.
+
+```bash
+curl --fail-with-body -sS \
+  'http://localhost:3000/v1/media/<asset-id>' \
+  -H 'Authorization: Bearer <project-api-key>'
+```
+
+## Success response
+
+200 JSON. This illustrative example shows a current thumbnail output; values are placeholders rather than an observed processing result.
+
+```json
+{
+  "id": "<asset-id>",
+  "project_id": "<project-id>",
+  "status": "ready",
+  "original_filename": "clip.mp4",
+  "mime_type": "video/mp4",
+  "file_size_bytes": 2048,
+  "uploaded_bytes": 2048,
+  "created_at": "2026-11-12T12:00:00.000Z",
+  "updated_at": "2026-11-12T12:00:10.000Z",
+  "thumbnail": {
+    "status": "ready",
+    "url": "/v1/media/<asset-id>/thumbnail",
+    "mime_type": "image/jpeg",
+    "width": 640,
+    "height": 360,
+    "file_size_bytes": 12345,
+    "created_at": "2026-11-12T12:00:11.000Z"
+  }
+}
+```
+
+## Response fields
+
+<div className="docs-table" tabIndex={0} role="region" aria-label="Scrollable reference table">
+<table>
+<thead><tr><th scope="col">Field</th><th scope="col">Type</th><th scope="col">Meaning</th></tr></thead>
+<tbody><tr><td><code>id</code> / <code>project_id</code></td><td>string</td><td>Asset ID and owning project ID.</td></tr><tr><td><code>status</code></td><td>string</td><td>Ingestion state; ready does not imply jobs complete.</td></tr><tr><td><code>original_filename</code> / <code>mime_type</code></td><td>string</td><td>Filename and video/mp4.</td></tr><tr><td><code>file_size_bytes</code> / <code>uploaded_bytes</code></td><td>number</td><td>Registered and received bytes, serialized as numbers.</td></tr><tr><td><code>created_at</code> / <code>updated_at</code></td><td>ISO timestamp string</td><td>Database timestamps; updated_at is absent from registration.</td></tr><tr><td><code>thumbnail</code></td><td>optional object</td><td>Only serialized when the service finds an output or relevant job state.</td></tr><tr><td><code>thumbnail.status</code></td><td>string</td><td>ready, processing or failed in implemented serializer branches.</td></tr><tr><td><code>thumbnail.url</code></td><td>optional string</td><td>Relative authenticated API path when ready.</td></tr><tr><td><code>thumbnail.mime_type</code></td><td>optional string</td><td>JPEG MIME type when ready.</td></tr><tr><td><code>thumbnail.width</code> / <code>thumbnail.height</code></td><td>optional number or null</td><td>Output dimensions from the current record.</td></tr><tr><td><code>thumbnail.file_size_bytes</code></td><td>optional number</td><td>Output bytes.</td></tr><tr><td><code>thumbnail.created_at</code></td><td>optional ISO timestamp string</td><td>Current output creation time.</td></tr></tbody>
+</table>
+</div>
+
+Without a current output, queued and processing thumbnail jobs both map to `{"status":"processing"}`; a failed job maps to `{"status":"failed"}`. Other cases omit `thumbnail`. The interface mentions `not_found`, but this is not a promise that a `not_found` object is actually serialized.
+
+Ingestion `ready` does not mean the thumbnail or metadata job completed. There is no full public extracted-metadata object, generic job list, transcoding configuration or rendition list in this committed response. See [metadata extraction](/docs/guides/metadata-extraction/).
+
+## Errors
+
+<div className="docs-table" tabIndex={0} role="region" aria-label="Scrollable reference table">
+<table>
+<thead><tr><th scope="col">Status / error</th><th scope="col">Condition</th></tr></thead>
+<tbody><tr><td>401 <code>unauthorized</code></td><td>Missing/invalid project key; expired or revoked key.</td></tr><tr><td>403 <code>project_inactive</code></td><td>Key belongs to an inactive project.</td></tr><tr><td>500 <code>internal_error</code></td><td>Unexpected failure; internal details sanitized.</td></tr></tbody>
+</table>
+</div><div className="docs-table" tabIndex={0} role="region" aria-label="Scrollable reference table">
+<table>
+<thead><tr><th scope="col">Status / error</th><th scope="col">Condition</th></tr></thead>
+<tbody><tr><td>404 <code>asset_not_found</code></td><td>No asset accessible within this project. Cross-project access has the same response.</td></tr></tbody>
+</table>
+</div>
+```json
+{
+  "error": "asset_not_found",
+  "message": "Media asset not found in this project"
+}
+```
+
+
+No UUID parameter schema is declared on this route. Use returned asset IDs; malformed IDs can cause database conversion errors handled as sanitized 500s, rather than a guaranteed 400/404. All values below are illustrative; examples were checked against source, not captured from a running backend. Replace IDs and credentials with your own authorized values. Review [onboarding blockers](/docs/project/known-limitations/) before executing requests.

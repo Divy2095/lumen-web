@@ -1,0 +1,50 @@
+# Installation and configuration
+
+Inspect and configure the selected backend revision without assuming that a clean checkout can run.
+
+<Callout title="Onboarding is blocked at this baseline">The committed code imports a local storage-service module that is absent from the commit. The commands below describe repository preparation, not a verified complete installation. Read the known issues before starting services.</Callout>
+
+## Inspect the revision
+
+In your own development checkout, obtain the backend and select the documented revision if it is available there. Remote availability of the exact local commit was not tested by this website task.
+
+```bash
+git clone https://github.com/Divy2095/Lumen.git
+cd Lumen
+git checkout 4899210e659864a2026b13b7d3c558e92da08780
+npm ci
+cp .env.example .env
+```
+
+Stop before treating this as runnable: verify that the storage dependency is included in a supported revision. This documentation does not provide a replacement module or a command to bypass the missing dependency. See [known limitations](/docs/project/known-limitations/).
+
+## Prepare the environment
+
+Edit `.env` yourself. Use the same newly chosen local password for Compose's `POSTGRES_PASSWORD` and the application's `PGPASSWORD`. Never copy a real credential from source comments, screenshots or tests.
+
+```bash
+POSTGRES_DB=lumen
+POSTGRES_USER=lumen
+POSTGRES_PASSWORD=<choose-a-local-password>
+PGHOST=127.0.0.1
+PGPORT=5432
+PGDATABASE=lumen
+PGUSER=lumen
+PGPASSWORD=<same-local-password>
+REDIS_HOST=127.0.0.1
+REDIS_PORT=6379
+REDIS_PASSWORD=
+```
+
+Angle-bracket values are editing placeholders, not executable shell syntax. The existing npm scripts load `.env` using Node's env-file option. Configuration names/defaults below come from source, not a claim that arbitrary values have been tested.
+
+## Configuration reference
+
+<div className="docs-table" tabIndex={0} role="region" aria-label="Scrollable reference table">
+<table>
+<thead><tr><th scope="col">Setting</th><th scope="col">Default / requirement</th></tr></thead>
+<tbody><tr><td><code>HOST</code> / <code>PORT</code></td><td>API: 0.0.0.0 / 3000; port must be an integer 1–65535.</td></tr><tr><td><code>PGHOST</code> / <code>PGPORT</code></td><td>127.0.0.1 / 5432; validated port.</td></tr><tr><td><code>PGDATABASE</code> / <code>PGUSER</code></td><td>lumen / lumen.</td></tr><tr><td><code>PGPASSWORD</code></td><td>Required by the application pool; no application default.</td></tr><tr><td><code>REDIS_HOST</code> / <code>REDIS_PORT</code></td><td>127.0.0.1 / 6379; validated port.</td></tr><tr><td><code>REDIS_PASSWORD</code> / <code>REDIS_DB</code></td><td>Optional password and optional non-negative database number.</td></tr><tr><td><code>STORAGE_BASE_DIR</code></td><td>storage, resolved relative to the process working directory.</td></tr><tr><td><code>STORAGE_MAX_UPLOAD_DURATION_MS</code></td><td>900000 (15 minutes).</td></tr><tr><td><code>STORAGE_INACTIVITY_TIMEOUT_MS</code></td><td>30000 (30 seconds).</td></tr><tr><td>Maximum upload / token lifetime</td><td>104857600 bytes (100 MiB) / 3600 seconds; fixed constants, not environment settings.</td></tr></tbody>
+</table>
+</div>
+
+The supplied Redis container has no password configuration. Setting only the application `REDIS_PASSWORD` would not configure that container; keep service and client settings aligned. Continue to [infrastructure and migrations](/docs/getting-started/infrastructure/) only after the missing prerequisite is resolved in a supported backend revision.

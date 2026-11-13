@@ -1,0 +1,22 @@
+# Overview
+
+Lumen is an early-development, API-first video-processing platform that you operate alongside your application.
+
+## What Lumen does
+
+Register an MP4 upload using a project API key, send its bytes using an issued upload token, then let background workers extract metadata and generate a JPEG thumbnail. PostgreSQL records asset and processing state. Redis and BullMQ dispatch background work; FFprobe and FFmpeg perform media operations.
+
+These documents describe committed source at `4899210e659864a2026b13b7d3c558e92da08780`. They do not certify a running service or production readiness. GitHub Pages hosts this website, not the Lumen API.
+
+## Start here
+
+- Read [core concepts](/docs/introduction/core-concepts/) to understand assets, credentials and jobs.
+- Check [known limitations](/docs/project/known-limitations/) before preparing a local environment.
+- Follow [installation and configuration](/docs/getting-started/installation/), then the conditional [first media workflow](/docs/getting-started/first-upload/).
+- Use the [API reference](/docs/api/register-media/) for exact request and response contracts.
+
+## Current boundaries
+
+The inspected commit imports a storage-service module that it does not include. Credential provisioning also lacks a verified public endpoint or complete supported walkthrough. Those are onboarding blockers, not steps these docs silently fill in.
+
+Transcoding exists only in local, uncommitted development beyond this baseline. HLS, resumable uploads, SDKs and other plans are not current API capabilities. See [development status](/docs/project/development-status/) and the [roadmap](/docs/project/roadmap/).

@@ -1,0 +1,19 @@
+# Prerequisites
+
+Prepare an isolated development environment, but review the onboarding blockers before running the backend.
+
+## Required tooling
+
+The backend engineering instructions specify Node.js 24+ and npm; the package is ESM with strict TypeScript. A backend runtime matrix has not been verified by this website task. Use the repository lockfile rather than mixing dependency versions from a local working tree.
+
+You need Docker Compose for the supplied PostgreSQL 17 and Redis 7 services, and FFmpeg/FFprobe available to the worker process. The default executable names are `ffmpeg` and `ffprobe`; their paths can be configured. Have a real MP4 video, curl, and a shell for the examples.
+
+## Required backend state
+
+Before a first upload, the selected backend revision must include its imported storage service, its schema must be migrated, and a supported provisioning path must supply an active project plus a matching API key. This baseline does not satisfy the storage prerequisite in a clean checkout. It also has no verified public credential-creation endpoint.
+
+Do not copy database rows or tokens from tests into an application. Review [credential provisioning limitations](/docs/getting-started/credentials/) and [known limitations](/docs/project/known-limitations/).
+
+## Service access
+
+For the default host-based development layout, PostgreSQL and Redis bind to loopback at ports 5432 and 6379. The API defaults to port 3000. Your API, publisher and workers need matching database/Redis settings and shared local storage. These are developer-operated services; this website supplies none of them.

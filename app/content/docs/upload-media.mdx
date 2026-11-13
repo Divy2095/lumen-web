@@ -1,0 +1,66 @@
+# PUT media upload
+
+PUT /v1/media/:id/upload ingests raw MP4 bytes using the issued upload token.
+
+## Request
+
+Use the `id`, relative `upload_url` and `upload_token` returned by registration. Authorization is **the issued upload token as Bearer**, not a project key; `x-api-key` alone is not supported. The ID identifies the registered asset. No JSON body or multipart envelope is accepted for the file workflow.
+
+Required headers: Authorization, Content-Type and Content-Length. Content-Type may be `video/mp4` with parameters or `application/octet-stream`; either still requires MP4 content. Content-Length must be a positive integer equal to the registered size and no greater than 104,857,600 bytes.
+
+```bash
+LUMEN_ORIGIN='http://localhost:3000'
+UPLOAD_URL='/v1/media/<asset-id>/upload'
+UPLOAD_TOKEN='<issued-upload-token>'
+FILE='./clip.mp4'
+FILE_SIZE=$(wc -c < "$FILE" | tr -d '[:space:]')
+
+curl --fail-with-body -sS --request PUT \
+  "$LUMEN_ORIGIN$UPLOAD_URL" \
+  -H "Authorization: Bearer $UPLOAD_TOKEN" \
+  -H 'Content-Type: video/mp4' \
+  -H "Content-Length: $FILE_SIZE" \
+  --data-binary "@$FILE"
+```
+
+Register that exact unchanged file first. Token consumption happens when the upload is claimed. Default token lifetime is one hour, maximum upload duration 15 minutes and inactivity timeout 30 seconds. Only the two transfer timeout values are environment-configurable in storage configuration.
+
+## Success response
+
+200 JSON on normal finalization:
+
+```json
+{
+  "id": "<asset-id>",
+  "project_id": "<project-id>",
+  "status": "ready",
+  "original_filename": "clip.mp4",
+  "mime_type": "video/mp4",
+  "file_size_bytes": 2048,
+  "uploaded_bytes": 2048,
+  "created_at": "2026-11-12T12:00:00.000Z",
+  "updated_at": "2026-11-12T12:00:10.000Z"
+}
+```
+
+The fields are asset/project IDs, ingestion status, filename/MIME, numeric declared/received size and ISO creation/update timestamps. No upload secret is returned again. `ready` means ingestion complete; metadata/thumbnail jobs can remain queued.
+
+A recovery branch that confirms an earlier successful database commit can return the public GET asset serialization, including optional thumbnail information. See [GET media](/docs/api/get-media/) for that optional shape. All values below are illustrative; examples were checked against source, not captured from a running backend. Replace IDs and credentials with your own authorized values. Review [onboarding blockers](/docs/project/known-limitations/) before executing requests.
+
+## Errors
+
+<div className="docs-table" tabIndex={0} role="region" aria-label="Scrollable reference table">
+<table>
+<thead><tr><th scope="col">Status / error</th><th scope="col">Condition</th></tr></thead>
+<tbody><tr><td>401 <code>unauthorized</code></td><td>Missing/malformed Bearer upload token or invalid credentials.</td></tr><tr><td>403 <code>token_expired</code></td><td>Issued token expired.</td></tr><tr><td>409 <code>asset_already_uploaded</code></td><td>Asset already ingested.</td></tr><tr><td>409 <code>upload_in_progress_or_consumed</code></td><td>Claim already held or token consumed.</td></tr><tr><td>415 <code>unsupported_media_type</code></td><td>Missing/unsupported content type.</td></tr><tr><td>411 <code>length_required</code></td><td>Missing Content-Length.</td></tr><tr><td>400 <code>invalid_content_length</code></td><td>Header not a positive integer.</td></tr><tr><td>400 <code>content_length_mismatch</code></td><td>Header differs from registered file size; checked before token consumption.</td></tr><tr><td>400 <code>invalid_media_container</code></td><td>Stream fails MP4 header/brand inspection.</td></tr><tr><td>400 <code>stream_byte_mismatch</code></td><td>Actual received byte count differs from expected.</td></tr><tr><td>400 <code>client_disconnected</code></td><td>Abort/reset detected; client may receive no response after disconnect.</td></tr><tr><td>413 <code>payload_too_large</code></td><td>Header exceeds global maximum or stream exceeds declared byte ceiling.</td></tr><tr><td>408 <code>upload_timeout</code></td><td>Inactivity, transfer-duration or related stream timeout.</td></tr><tr><td>500 <code>internal_error</code></td><td>Ingestion/finalization or unexpected internal failure.</td></tr></tbody>
+</table>
+</div>
+```json
+{
+  "error": "length_required",
+  "message": "Content-Length header is required for media upload"
+}
+```
+
+
+Central framework client errors can use `client_error`; parser checks can reject a request before token checks. Do not assume every error is delivered on a terminated socket. On an uncertain database finalization outcome, the source preserves the final file for reconciliation. A consumed token is not reusable simply because the request failed. See [error handling](/docs/guides/error-handling/).

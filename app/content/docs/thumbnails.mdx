@@ -1,0 +1,19 @@
+# Thumbnail generation and retrieval
+
+Background FFmpeg work creates a JPEG; authenticated retrieval serves the current output.
+
+## Generation
+
+Upload finalization schedules a `generate_thumbnail` job. The initial internal job parameters request a 1-second offset. The timestamp helper accepts an in-range offset, otherwise falls back to roughly 10% of the duration (or zero for an invalid duration). There is no public timestamp parameter on the current registration API.
+
+The worker can use stored duration or probe it independently. FFmpeg writes a JPEG, validates its dimensions/size and commits an output record. Current output selection/versioning is internal; clients are not promised an arbitrary version URL.
+
+## Configuration
+
+The worker reads `FFMPEG_PATH` (default `ffmpeg`), `FFMPEG_TIMEOUT_MS` (10000ms) and `FFMPEG_MAX_OUTPUT_BYTES` (5242880 bytes). Ensure the API and worker resolve the same local storage. These are source defaults, not processing-duration guarantees.
+
+## Inspect before retrieving
+
+Poll [GET media](/docs/api/get-media/). `thumbnail.status: "ready"` provides a relative URL plus JPEG properties. A processing/failed thumbnail may have only its status. A missing thumbnail member is not a success signal.
+
+[GET thumbnail](/docs/api/get-thumbnail/) requires the project API key and returns image bytes. It returns 404 when no current output is available or the file is missing. An HTML image URL by itself does not attach a Bearer header; keep authenticated retrieval on the appropriate application boundary. This baseline does not expose a signed public delivery URL.

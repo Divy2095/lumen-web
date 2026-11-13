@@ -1,0 +1,31 @@
+# GET health
+
+GET /health reports application liveness without authenticating the caller.
+
+## Request
+
+No authentication, body or special request headers are required. Use your separately operated backend origin, not this website's base path.
+
+```bash
+curl -i http://localhost:3000/health
+```
+
+## Success response
+
+200 JSON, with `status`, `service` and a generated ISO timestamp:
+
+```json
+{
+  "status": "ok",
+  "service": "lumen",
+  "timestamp": "2026-11-12T12:00:00.000Z"
+}
+```
+
+The route sets `Cache-Control: no-store, no-cache, must-revalidate, proxy-revalidate`. The timestamp above is illustrative. This is liveness only: it does not query PostgreSQL or establish that uploads/workers are operational. Application startup can still fail before the route becomes reachable.
+
+## Errors
+
+The handler has no deliberate domain-error branch. Unexpected application errors are subject to the central sanitized 500 handler; connection failures may produce no HTTP response. There are no route-specific body or authentication errors to invent here. For database readiness, use [GET ready](/docs/api/ready/).
+
+These examples describe source behavior; no backend request was executed for this documentation.

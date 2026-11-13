@@ -1,0 +1,39 @@
+# Running the API and workers
+
+Run three separate processes only after storage, schema and configuration prerequisites are satisfied.
+
+## Before starting
+
+The inspected clean checkout is incomplete. These are the committed process entry points, not a claim that they run successfully from this revision. Resolve the [known issues](/docs/project/known-limitations/) in a supported backend revision first; do not fabricate a storage implementation from these docs.
+
+All processes must target the same development database/Redis instance. API and workers must agree on `STORAGE_BASE_DIR` and have access to the same files. Relative paths depend on their working directories.
+
+## Process commands
+
+Run each command in its own terminal from the backend checkout, with its prepared `.env`:
+
+```bash
+# HTTP API; development watch mode
+npm run dev
+```
+
+```bash
+# Durable outbox dispatcher
+npm run outbox:publisher
+```
+
+```bash
+# Media-processing workers
+npm run worker
+```
+
+The API accepts traffic on `HOST`/`PORT`. The publisher dispatches outbox events; it does not execute FFmpeg. The worker processes jobs; starting it without the publisher leaves newly committed outbox events undispatched. The default worker concurrency is five.
+
+## Verify the right boundary
+
+```bash
+curl -i http://localhost:3000/health
+curl -i http://localhost:3000/ready
+```
+
+A liveness response is not a queue/storage/worker health check. Readiness checks PostgreSQL only and can return 503. These example requests were not run against the backend. See [health](/docs/api/health/), [readiness](/docs/api/ready/) and [troubleshooting](/docs/guides/troubleshooting/). Use normal process termination; the source includes bounded graceful-shutdown handlers.

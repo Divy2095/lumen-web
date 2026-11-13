@@ -1,0 +1,25 @@
+# API-key authentication
+
+Authenticate server-side registration and retrieval requests using a project-owned secret.
+
+## Send a project key
+
+Use either supported header for registration, asset retrieval or thumbnail retrieval:
+
+```bash
+curl --fail-with-body -sS \
+  'http://localhost:3000/v1/media/<asset-id>' \
+  -H 'Authorization: Bearer <project-api-key>'
+```
+
+Alternatively send `x-api-key: <project-api-key>`. If an Authorization value starts with the case-sensitive `Bearer ` prefix, the plugin uses that value instead of falling back to `x-api-key`. Send one credential header to avoid ambiguous integration behavior.
+
+## Validation and ownership
+
+Missing/invalid, expired or revoked keys produce 401 `unauthorized`. A valid key attached to an inactive project produces 403 `project_inactive`. Successful authentication sets project context; media queries then restrict ownership. A valid key from another project receives 404 for an asset it cannot access.
+
+Never put the project key in a client-side bundle, public repository, documentation URL or HTML image source. The website cannot issue or recover keys. Review [credential provisioning limitations](/docs/getting-started/credentials/).
+
+## Uploads use a different credential
+
+The upload route does not apply this project-key plugin. It expects the issued upload token as Bearer authorization. A project API key is not a substitute, and `x-api-key` alone is not accepted there. See [upload-token authentication](/docs/guides/upload-token-authentication/).

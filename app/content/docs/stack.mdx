@@ -1,0 +1,19 @@
+# Technology stack
+
+Understand each component’s responsibility instead of treating a dependency list as a feature list.
+
+## HTTP and persistent state
+
+Node.js runs the ESM TypeScript application through tsx in the committed development scripts. Fastify handles routing, schema validation and streams. PostgreSQL 17 is the Compose database, accessed through a pg pool. SQL migrations define ownership, media, job and output state.
+
+## Background execution
+
+Redis 7 Alpine is the Compose queue infrastructure. BullMQ carries work; PostgreSQL remains the durable job source. The outbox publisher bridges committed events to the queue. Separate background workers execute FFprobe/FFmpeg processes and persist results.
+
+Media files and generated JPEGs use a local-storage interface; its imported implementation is not present in the selected commit. No implemented S3 delivery adapter was established. Docker Compose supplies PostgreSQL/Redis only, not an all-in-one API/worker runtime.
+
+## Website boundary
+
+This documentation website uses React/TypeScript, Vite/React Router static prerendering, MDX, build-time Shiki, static Pagefind search and Tailwind CSS. Its GitHub Pages path is `/lumen-web/`; API examples target a separate local backend origin.
+
+A README dependency or planned technology does not prove an implemented feature. In particular, tus resumable uploads and HLS are roadmap material; unreleased transcoding is outside this reference. Read [development status](/docs/project/development-status/).

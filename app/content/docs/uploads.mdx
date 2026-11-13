@@ -1,0 +1,21 @@
+# Streaming MP4 uploads
+
+Send raw MP4 bytes with the exact declared length, not a multipart body.
+
+## Transport contract
+
+Use the returned upload URL with PUT and the issued Bearer upload token. `Content-Type` accepts `video/mp4` (including media parameters) or `application/octet-stream`. Both still require MP4 content. A filename or octet-stream header does not enable arbitrary formats.
+
+`Content-Length` is required, positive, integral and equal to the registered file size. Do not use chunked transfer as a substitute or wrap the bytes in multipart/form-data. The maximum is 104,857,600 bytes. See the [complete request example](/docs/getting-started/first-upload/#upload-the-exact-bytes).
+
+## Validation boundaries
+
+The stream inspector checks the initial `ftyp` container signature and recognized brands while enforcing a byte ceiling. It is not a full decode or a guarantee that media is playable. A container accepted during ingestion can later fail FFprobe/FFmpeg, including a corrupt or audio-only input.
+
+The handler writes a temporary file, verifies the received byte count, commits the file, and finalizes PostgreSQL state/jobs/outbox. Upload completion returns 200 and an asset with ingestion `ready`; it does not wait for processing.
+
+## Timeouts and disconnections
+
+The default maximum upload duration is 900000ms and inactivity timeout is 30000ms. They are configurable with the storage timeout environment variables. A timeout can terminate the connection; a disconnected client may never receive the intended JSON error body.
+
+If finalization fails after filesystem commit, the handler inspects database state to decide whether to retain or remove the file. When commit outcome is uncertain, it preserves the file for reconciliation. Do not blindly reuse the upload token. See [error handling](/docs/guides/error-handling/) and [troubleshooting](/docs/guides/troubleshooting/).

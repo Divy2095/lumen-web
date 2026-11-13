@@ -1,0 +1,19 @@
+# Upload-token authentication
+
+Use the issued credential only for the matching asset upload.
+
+## Token scope and lifetime
+
+A successful registration issues `upload_token`, `upload_url` and `upload_expires_at`. The token is scoped to that asset, is stored hashed, and has a one-hour lifetime. Send it using the case-sensitive `Authorization: Bearer ` prefix when uploading raw bytes.
+
+Do not substitute a project API key or use the upload token to retrieve an asset/JPEG. The two credentials protect different boundaries. See [API-key authentication](/docs/guides/api-key-authentication/).
+
+## When consumption happens
+
+The handler checks credentials/state and declared Content-Length before atomically claiming the token. A size mismatch rejected during preflight does not consume it; a claimed upload consumes it before transfer/finalization finishes. A network failure after claiming does not imply the same token is reusable.
+
+Concurrent upload attempts cannot both claim the same token. Invalid credentials return 401 without disclosing the asset state. Expiry returns 403 `token_expired`. Already-ingested or in-progress/consumed cases return 409 with distinct error names.
+
+## Recovery
+
+Read the response and, if necessary, inspect the asset using a project key. Do not automatically retry a consumed token, assume a failed upload is resumable, or fabricate a token-refresh endpoint. There is no such public workflow in the baseline. Consult [upload errors](/docs/api/upload-media/#errors) and create a fresh registration only as a deliberate application decision.

@@ -1,0 +1,72 @@
+<div className="api-workflow">
+<div className="api-step-copy">
+<span className="section-index">01 / Register</span>
+<h3>Start with your project API key.</h3>
+<p>Register the MP4 filename, MIME type and exact byte count. Lumen returns an asset ID and a single-use upload token.</p>
+<p className="example-note">Shell example for your own local API. Replace the project-key placeholder and use a real MP4 file. These commands are displayed, never executed by this website.</p>
+</div>
+<div className="api-step-code">
+
+```bash
+LUMEN_ORIGIN='http://localhost:3000'
+LUMEN_API_KEY='<project-api-key>'
+FILE='./clip.mp4'
+FILE_SIZE=$(wc -c < "$FILE" | tr -d '[:space:]')
+
+curl --fail-with-body -sS "$LUMEN_ORIGIN/v1/media" \
+  -H "Authorization: Bearer $LUMEN_API_KEY" \
+  -H 'Content-Type: application/json' \
+  --data "{
+    \"original_filename\": \"clip.mp4\",
+    \"mime_type\": \"video/mp4\",
+    \"file_size_bytes\": $FILE_SIZE
+  }"
+```
+
+<details className="api-response">
+
+<summary>201 response · illustrative values</summary>
+
+<p>Field names match the committed serializer. IDs, token, size and timestamps below are illustrative. Your response contains the real upload URL and token.</p>
+
+```json
+{
+  "id": "<asset-id>",
+  "project_id": "<project-id>",
+  "status": "uploading",
+  "original_filename": "clip.mp4",
+  "mime_type": "video/mp4",
+  "file_size_bytes": 2048,
+  "uploaded_bytes": 0,
+  "upload_token": "<single-use-upload-token>",
+  "upload_url": "/v1/media/<asset-id>/upload",
+  "upload_expires_at": "2026-11-12T13:00:00.000Z",
+  "created_at": "2026-11-12T12:00:00.000Z"
+}
+```
+
+</details>
+</div>
+<div className="api-step-copy">
+<span className="section-index">02 / Upload</span>
+<h3>Send the file with its upload token.</h3>
+<p>Use the relative URL and token from registration. Send raw MP4 bytes with the same Content-Length you registered; the token is consumed when the upload is claimed.</p>
+<p className="example-note">Keep the origin, file and byte-count variables from step 1. Substitute the returned upload_url and upload_token below. Never put a project API key in client-side application code.</p>
+</div>
+<div className="api-step-code">
+
+```bash
+UPLOAD_URL='/v1/media/<asset-id>/upload'
+UPLOAD_TOKEN='<single-use-upload-token>'
+
+curl --fail-with-body -sS --request PUT \
+  "$LUMEN_ORIGIN$UPLOAD_URL" \
+  -H "Authorization: Bearer $UPLOAD_TOKEN" \
+  -H 'Content-Type: video/mp4' \
+  -H "Content-Length: $FILE_SIZE" \
+  --data-binary "@$FILE"
+```
+
+<p className="upload-result-note">A successful upload returns the ingested asset with <code>status: "ready"</code>. Background work can still be queued or processing. Generated JPEG retrieval requires the project API key, not the upload token.</p>
+</div>
+</div>

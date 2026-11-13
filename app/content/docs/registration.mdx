@@ -1,0 +1,21 @@
+# Media registration
+
+Register an upload intent before streaming bytes.
+
+## Declare the upload
+
+Registration requires a project API key and JSON containing `original_filename`, `mime_type` and `file_size_bytes`. The MIME type must be `video/mp4`; size must be a positive integer no greater than 104,857,600 bytes (100 MiB).
+
+The filename is 1–255 characters at schema validation; the handler strips directory components using slash/backslash separators. Do not rely on a filename to select a storage path. Unknown request properties may be handled by the framework's validation settings; do not send undocumented fields.
+
+## Read the response once
+
+The 201 response includes the new asset ID, its `uploading` state, a relative upload URL, a single-use token and its expiration. Store what your server needs to coordinate the upload; do not expose the project key with it. The token lifetime is one hour from issuance.
+
+Registration is not file ingestion and does not schedule metadata/thumbnail jobs until upload finalization. It does not accept public job parameters, arbitrary thumbnail timestamps or transcoding configuration in this committed contract.
+
+## Failure and retry considerations
+
+Registration uses validation errors (400) for an unsupported MIME type, invalid size or missing required field. The upload route has separate 413/415 cases; do not merge their contracts. Authentication failures are 401/403 and unexpected internal failures are sanitized 500s.
+
+No public idempotency-header implementation was established. Retrying a registration after an ambiguous network failure can create another asset. Coordinate this deliberately rather than assuming a request is deduplicated. See [POST media reference](/docs/api/register-media/) and [first upload](/docs/getting-started/first-upload/).

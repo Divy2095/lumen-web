@@ -1,0 +1,21 @@
+# Contributing
+
+Prepare a source-specific, sanitized report or proposal without assuming an unverified contribution policy.
+
+## Before proposing a change
+
+Read the backend repository's current engineering instructions, selected revision and development status. This website and the backend are independent repositories. A website documentation change is not permission to modify backend files, infrastructure or data.
+
+No dedicated CONTRIBUTING or standalone LICENSE file was found in the inspected tracked tree. The package declares ISC; confirm the project's license and contribution expectations with the maintainer before relying on a broader policy. These docs do not invent a code of conduct, support SLA or security-disclosure channel.
+
+## Useful issue information
+
+Include the commit, relevant source file/route, expected versus observed behavior and a minimal reproduction. Clearly identify whether the report concerns committed code or local uncommitted work. Remove API keys, tokens, passwords, private media and sensitive filesystem paths.
+
+Discuss schema, lifecycle and authentication changes before implementing them. For documentation issues, cite the page and the source contract that differs. The source-reference links on articles identify the reviewed baseline.
+
+## Backend validation boundary
+
+The package has `typecheck` and `test` scripts. Tests target `lumen_test` and can write database rows and storage; they are not read-only documentation checks. Use an explicitly authorized isolated environment and the backend's database guard. No backend test was run by this website phase, and an ignored module still blocks clean-checkout reproducibility.
+
+Website-only validation commands and evidence are maintained in repository phase reports. Do not claim tests passed unless they were executed in the relevant environment. See [known limitations](/docs/project/known-limitations/).

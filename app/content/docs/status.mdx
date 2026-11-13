@@ -1,0 +1,25 @@
+# Development status
+
+Separate committed implementation, local development, plans and runtime verification.
+
+## Documentation baseline
+
+These documents describe local commit `4899210e659864a2026b13b7d3c558e92da08780`. Reading source and tests is evidence of implementation intent and test presence, not a passing backend run. Remote publication of that exact revision and production deployment were not established.
+
+## Committed implementation
+
+Registration, API-key/ownership checks, single-use upload tokens, MP4 stream inspection, ingestion finalization, transactional jobs/outbox, BullMQ dispatch, metadata persistence, JPEG generation and authenticated asset/thumbnail retrieval have committed source. Health and PostgreSQL readiness routes also exist.
+
+The clean checkout is not self-contained: imported storage-service implementation is absent from the commit. Thus even committed processing code must not be described as verified working from a clean clone.
+
+## Local uncommitted development
+
+The inspected working tree contains actual transcoding/profile resolution, scheduling, rendition delivery and a supporting migration that are not part of this commit. Modified FFprobe/worker/media files and new transcoding tests belong to that local development snapshot. They are not current API-reference contracts here.
+
+## Partial and planned work
+
+Webhook and public idempotency-related tables do not establish a complete HTTP implementation. The committed processor's transcode operation branch is a placeholder. Other future directions are listed separately in the [roadmap](/docs/project/roadmap/), without release dates or guarantees.
+
+## Runtime evidence
+
+Backend tests were inspected but not run for these docs; some mutate database and local storage. Website type/build/browser tests validate documentation delivery only. Resolve [known limitations](/docs/project/known-limitations/) before claiming a working onboarding flow or production readiness.

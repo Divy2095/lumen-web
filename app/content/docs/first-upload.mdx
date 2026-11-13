@@ -1,0 +1,63 @@
+# First registration and upload
+
+A conditional walkthrough for developers who already have a working backend and an active project API key.
+
+<Callout title="Before you copy these commands">Storage reproducibility and credential provisioning are unresolved in the inspected baseline. This is a source-backed integration example, not a verified clean-checkout walkthrough. Use only your own authorized local API and credentials.</Callout>
+
+## Register the file
+
+Set the backend origin, your project key and a real MP4 file. The maximum accepted registration size is 104,857,600 bytes. Keep this file unchanged between registration and upload.
+
+```bash
+LUMEN_ORIGIN='http://localhost:3000'
+LUMEN_API_KEY='<project-api-key>'
+FILE='./clip.mp4'
+FILE_SIZE=$(wc -c < "$FILE" | tr -d '[:space:]')
+
+curl --fail-with-body -sS "$LUMEN_ORIGIN/v1/media" \
+  -H "Authorization: Bearer $LUMEN_API_KEY" \
+  -H 'Content-Type: application/json' \
+  --data "{
+    \"original_filename\": \"clip.mp4\",
+    \"mime_type\": \"video/mp4\",
+    \"file_size_bytes\": $FILE_SIZE
+  }"
+```
+
+A 201 response provides `id`, `upload_url`, `upload_token` and `upload_expires_at`, along with the asset fields. Copy the real returned values into the next step; see the [complete registration contract](/docs/api/register-media/).
+
+## Upload the exact bytes
+
+```bash
+ASSET_ID='<id-from-registration>'
+UPLOAD_URL='/v1/media/<id-from-registration>/upload'
+UPLOAD_TOKEN='<upload_token-from-registration>'
+
+curl --fail-with-body -sS --request PUT \
+  "$LUMEN_ORIGIN$UPLOAD_URL" \
+  -H "Authorization: Bearer $UPLOAD_TOKEN" \
+  -H 'Content-Type: video/mp4' \
+  -H "Content-Length: $FILE_SIZE" \
+  --data-binary "@$FILE"
+```
+
+Use the actual relative `upload_url` from registration, not the placeholder path. This is a raw upload, not multipart/form-data. A successful 200 response means ingestion is `ready`; metadata and thumbnail work can still be queued.
+
+## Inspect and retrieve
+
+```bash
+curl --fail-with-body -sS \
+  "$LUMEN_ORIGIN/v1/media/$ASSET_ID" \
+  -H "Authorization: Bearer $LUMEN_API_KEY"
+```
+
+When `thumbnail.status` is `ready`, use your project API key to retrieve the JPEG. Poll with a sensible delay in your own integration; this revision defines no promised processing duration or public rate-limit contract.
+
+```bash
+curl --fail-with-body -sS \
+  "$LUMEN_ORIGIN/v1/media/$ASSET_ID/thumbnail" \
+  -H "Authorization: Bearer $LUMEN_API_KEY" \
+  --output thumbnail.jpg
+```
+
+A non-ready thumbnail returns 404, not a successful empty JPEG. Never use the upload token for retrieval. See [processing states](/docs/guides/processing/), [errors](/docs/guides/error-handling/) and [thumbnail retrieval](/docs/api/get-thumbnail/).

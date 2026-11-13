@@ -1,0 +1,19 @@
+# Metadata extraction
+
+FFprobe extracts metadata in a background job and the worker persists it internally.
+
+## Extracted data
+
+The committed FFprobe service reads the stored file and validates a video stream, positive dimensions, a video codec and a usable duration. It parses duration, dimensions, codecs, frame rate and bitrate; audio metadata is optional. The worker persists database columns and raw metadata. Missing audio alone is not the same as missing video.
+
+The service rejects invalid/corrupt media or absent video, and bounds subprocess execution/output. Upload-time MP4 brand inspection is a different validation layer. A successfully ingested asset is not proof that extraction will succeed.
+
+## Configuration
+
+`FFPROBE_PATH` defaults to `ffprobe`. `FFPROBE_TIMEOUT_MS` defaults to 10000 and `FFPROBE_MAX_BUFFER_BYTES` to 1048576. They are read by the worker-side service; configuring only a separately launched API process does not configure your workers.
+
+## Public API limitation
+
+The committed `MediaAssetPublic` serializer does not return duration, dimensions, codecs, frame rate, bitrate or raw metadata as general asset fields. Do not build a client expecting those fields merely because extraction stores them. There is no committed public metadata-query endpoint beyond the documented asset response.
+
+Rotation/transcoding extensions in local uncommitted work are excluded. See [development status](/docs/project/development-status/) and [GET media response fields](/docs/api/get-media/#response-fields).

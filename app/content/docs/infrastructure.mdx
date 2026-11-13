@@ -1,0 +1,31 @@
+# Infrastructure and migrations
+
+Understand the supplied database and queue services and the migration entry points.
+
+## Infrastructure services
+
+In a prepared development checkout, the supplied Compose file defines PostgreSQL 17 and Redis 7 Alpine, both published on loopback. It creates persistent named volumes and health checks. It does not start the API, publisher or media worker.
+
+```bash
+docker compose up -d postgres redis
+docker compose ps
+```
+
+These commands are documented from configuration and were not executed for this website. Do not run them against an unreviewed environment or assume they resolve the [storage module blocker](/docs/project/known-limitations/).
+
+## Migration entry points
+
+The package defines the following commands, loading `.env`. Confirm the intended development database before invoking a state-changing migration.
+
+```bash
+npm run db:migrate:status
+npm run db:migrate
+```
+
+`db:migrate:status` lists migration files and compares them with `pgmigrations`. `db:migrate` invokes node-pg-migrate. The inspected commit contains `001_initial_schema.sql`; a local uncommitted transcoding migration is not part of this baseline. No clean-database migration run was verified here.
+
+## Schema and credential boundary
+
+The initial schema includes accounts, identities, projects, API keys, media assets, jobs, attempts, outputs and outbox events. Webhook/idempotency tables also exist, but tables alone do not establish public implementations. Do not infer API operations from table names.
+
+Migrations do not establish a supported credential-provisioning workflow. Before [running the processes](/docs/getting-started/running/), read [credential limitations](/docs/getting-started/credentials/). Do not use destructive volume removal or rollback commands to fix an unknown application failure.

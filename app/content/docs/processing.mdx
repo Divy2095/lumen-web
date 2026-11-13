@@ -1,0 +1,25 @@
+# Processing lifecycle
+
+Treat ingestion, metadata and thumbnail state as independent concerns.
+
+## Ingestion is not processing completion
+
+Registration creates an asset in `uploading`. Successful ingestion commits `ready` alongside two queued jobs and their outbox events. A failed ingestion can become `failed`. The database also defines deletion states; no public deletion API was established in this revision.
+
+`ready` means the source was ingested. It can coexist with queued, processing or failed background work. The [landing-page simulation](/lumen-web/#pipeline) illustrates this separation without connecting to a backend.
+
+## Independent worker jobs
+
+`extract_metadata` and `generate_thumbnail` run independently. Thumbnail processing can probe duration itself, so it need not wait for the metadata job. Internally, jobs use `queued`, `processing`, `completed`, `failed` and `cancelled` states. Those are database states, not a public job-control API.
+
+The default BullMQ policy allows three attempts with exponential backoff starting at 1000ms. Database claims also cap attempts at three, use a default 60000ms lease and fence completion writes. These settings describe source behavior, not a reliability or latency guarantee.
+
+## Public polling behavior
+
+The public asset response includes an optional thumbnail object. Its status is `ready` when a current output exists, `processing` for either a queued or processing thumbnail job, and `failed` for a failed job when no output is present. Other cases can omit the member entirely. Do not assume an explicit `not_found` object will always be serialized.
+
+The current response does not expose a generic job list or the full extracted metadata. See [GET media](/docs/api/get-media/) for fields and [metadata extraction](/docs/guides/metadata-extraction/) for the internal boundary.
+
+## Failure inspection
+
+Use asset/thumbnail state plus separately authorized operator logs. Do not invent a public retry, cancellation, webhook or job-status route. Storage/worker failures can leave ingestion `ready` while thumbnail work fails. See [troubleshooting](/docs/guides/troubleshooting/).

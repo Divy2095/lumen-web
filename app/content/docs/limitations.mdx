@@ -1,0 +1,27 @@
+# Known limitations
+
+Read these constraints before attempting onboarding or relying on an API capability.
+
+## Missing storage implementation
+
+The committed routes/workers import `src/shared/storage/local-storage.service.ts`, but that file is absent from the inspected commit and exists only as an ignored local file. A clean checkout is therefore not a self-contained working backend. This website does not supply a replacement or silently fix the backend.
+
+A maintainer-reviewed backend revision must include the dependency, followed by an isolated clean-checkout test. File presence on a local working tree is not that evidence.
+
+## Credential provisioning
+
+No verified public account/project/API-key creation endpoint or supported complete provisioning procedure was established. Schema tables and test fixtures do not resolve the gap. See [credential limitations](/docs/getting-started/credentials/); do not invent INSERT recipes or copy test secrets.
+
+## Public response and delivery limits
+
+Extracted metadata is persisted internally but not fully returned in the current asset response. JPEG retrieval is authenticated, not a public CDN or signed URL. Thumbnail absence/processing/failure differs from asset ingestion state. No generic job-management, retry/cancel or webhook-delivery API is documented.
+
+Uploads require complete raw MP4 bytes and a matching Content-Length. There is no resumable or token-renewal contract. Transfer failure after claiming the token does not guarantee safe retry. Local filesystem and database commit boundaries can require reconciliation after uncertain failures.
+
+## Scope and verification
+
+Transcoding/rendition delivery remain local uncommitted development; HLS, tus, SDKs, analytics and dashboard plans are not current features. PostgreSQL readiness does not verify the full pipeline. Runtime behavior, clean migrations, credential setup and complete onboarding were not executed or certified for this website.
+
+## License and publication
+
+The backend package declares ISC, but no standalone license file was found at this revision. Remote availability of the inspected local commit and an operational hosted API were not verified. The website is not an upload service, and no credentials should be entered into it. See [status](/docs/project/development-status/) for evidence categories.

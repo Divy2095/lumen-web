@@ -1,0 +1,19 @@
+# Roadmap
+
+Future directions are not current API capabilities or delivery commitments.
+
+## Unreleased local development
+
+Transcoding and rendition delivery are implemented in local uncommitted work beyond the documentation baseline. They require supporting schema/configuration changes and separate review. Their presence on one machine does not make them available in a published revision. No current-use rendition guide or endpoint is included here.
+
+## Planned directions
+
+The README discusses HLS adaptive streaming, resumable uploads with tus, SDKs, usage analytics and a developer dashboard. It also includes webhook ambitions. These are roadmap items, not promises that this API accepts those requests today.
+
+Webhook tables and a transcode operation enum are partial architecture artifacts. Do not infer signed callback delivery, a job-control API or public idempotency headers from them.
+
+## Near-term documentation gates
+
+The missing tracked storage implementation and supported project/key provisioning must be resolved before a reproducible onboarding walkthrough can be verified. A selected backend revision and isolated runtime checks are needed before changing [development status](/docs/project/development-status/).
+
+No release date, SLA or public live-upload demo is promised. The website's pipeline is illustrative only. Propose changes through the [contribution guidance](/docs/project/contributing/) rather than treating this list as an implementation authorization.
