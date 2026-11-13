@@ -8,7 +8,7 @@ export async function normalizeStaticOutput(clientDir = "build/client", serverDi
   // repository prefix itself, so move only the generated document tree up once.
   const prefixed = join(clientDir, basePath.slice(1));
   // Check every expected document before touching the generated artifact.
-  for (const path of ["", ...documents.map(doc => `${doc.path}/`)]) {
+  for (const path of ["", "auth-poc/", ...documents.map(doc => `${doc.path}/`)]) {
     await access(join(prefixed, path, "index.html"));
   }
   await access(join(clientDir, "404.html"));
