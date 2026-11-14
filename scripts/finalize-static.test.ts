@@ -11,7 +11,7 @@ test("Pages normalization replaces SPA shell, preserves assets/404, and removes 
   const client = join(temp, "client");
   const server = join(temp, "server");
   try {
-    for (const path of ["", "auth-poc/", ...documents.map(doc => `${doc.path}/`)]) {
+    for (const path of ["", "auth-poc/", "sign-in/", "sign-up/", ...documents.map(doc => `${doc.path}/`)]) {
       const directory = join(client, basePath, path);
       await mkdir(directory, { recursive: true });
       await writeFile(join(directory, "index.html"), `prerendered:${path}`);

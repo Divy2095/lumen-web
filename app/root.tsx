@@ -1,3 +1,4 @@
+import { AuthProvider } from "./auth/provider";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { isRouteErrorResponse, Link, Links, Meta, Outlet, Scripts, ScrollRestoration, useLocation } from "react-router";
 import sansUrl from "@fontsource-variable/geist/files/geist-latin-wght-normal.woff2?url";
@@ -15,7 +16,9 @@ export function Layout({ children }: { children: ReactNode }) {
   </head><body>{children}<ScrollRestoration /><Scripts /></body></html>;
 }
 
-export default function App() {
+export default function App(){return <AuthProvider><Site/></AuthProvider>;}
+
+function Site() {
   const { pathname } = useLocation();
   const main = useRef<HTMLElement>(null);
   const previous = useRef(pathname);

@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { Pause, Play, RotateCcw, ArrowDown, Check } from "lucide-react";
 import { Button } from "../ui/button";
 
+import "./processing-pipeline.css";
+
 const steps = [
   { title: "Register media", detail: "API key authenticates the project and its MP4 upload intent.", technical: "POST /v1/media" },
   { title: "Issue upload token", detail: "Return a single-use credential and an asset-specific upload URL.", technical: "201 · asset: uploading" },

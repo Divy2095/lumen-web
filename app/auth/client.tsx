@@ -1,4 +1,4 @@
-import { ClerkProvider, useAuth, useClerk } from '@clerk/react';
+import { useAuth, useClerk } from '@clerk/react';
 import { useState } from 'react';
 import { Button } from '../ui/button';
 import { basePath } from '../../site.config';
@@ -22,6 +22,4 @@ function SessionCheck() {
   <p role="status">{status}</p>
  </div>;
 }
-export default function ClientAuth({publishableKey}:{publishableKey:string}) {
- return <ClerkProvider publishableKey={publishableKey} afterSignOutUrl={returnPath} signInForceRedirectUrl={returnPath} signUpForceRedirectUrl={returnPath}><SessionCheck/></ClerkProvider>;
-}
+export default function ClientAuth() { return <SessionCheck/>; }

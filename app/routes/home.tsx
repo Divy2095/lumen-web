@@ -2,7 +2,8 @@ import { Link } from "react-router";
 import { ArrowRight, ArrowUpRight, FileVideo, FileJson, Image as ImageIcon } from "lucide-react";
 import { docsPath, githubUrl } from "../../site.config";
 import { CodeBlock } from "../components";
-import { Pipeline } from "../product/pipeline";
+import { Playground } from "../product/playground";
+import { ProductPreview } from "../product/preview";
 import { Architecture } from "../product/architecture";
 import ApiExample from "../product/api-example.mdx";
 import "../product/landing.css";
@@ -58,7 +59,7 @@ export default function Home() {
       <div className="landing-actions"><Link to={docsPath} className="button button-primary">Get Started<ArrowRight size={16} aria-hidden="true" /></Link><a href={githubUrl} className="button button-secondary">GitHub<ArrowUpRight size={15} aria-hidden="true" /></a></div>
       <p className="hero-footnote">Open source. API-first. Built for developers.</p>
     </div><HeroSchematic /></section>
-    <nav className="landing-section-nav" aria-label="On this page"><a href="#pipeline">The flow</a><a href="#capabilities">Capabilities</a><a href="#developer-experience">API workflow</a><a href="#architecture">Architecture</a><a href="#getting-started">Get started</a></nav>
-    <Pipeline /><Capabilities /><DeveloperExperience /><Architecture /><GettingStarted />
+    <nav className="landing-section-nav" aria-label="On this page"><a href="#product-preview">Example outputs</a><a href="#capabilities">Capabilities</a><a href="#developer-experience">API workflow</a><a href="#architecture">Architecture</a><a href="#getting-started">Get started</a></nav>
+    <ProductPreview /><Capabilities /><Playground /><DeveloperExperience /><Architecture /><GettingStarted />
   </div>;
 }

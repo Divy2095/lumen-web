@@ -8,12 +8,12 @@ const home = 'http://127.0.0.1:4173' + basePath;
 test("landing content and verified examples are prerendered and readable without JS", async ({ browser }) => {
   const html = await readFile('build/client/index.html', 'utf8');
   expect(html).toContain('Video processing,');
-  expect(html).toContain('Issue upload token');
+  expect(html).toContain('sample-video.mp4');
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
   await page.goto(home);
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Video processing,through an API.');
-  for (const id of ['pipeline','capabilities','developer-experience','architecture','getting-started']) await expect(page.locator(`#${id}`)).toBeVisible();
+  for (const id of ['product-preview','capabilities','developer-experience','architecture','getting-started']) await expect(page.locator(`#${id}`)).toBeVisible();
   await expect(page.getByRole('link', { name: 'Get Started', exact: true })).toHaveAttribute('href', `${basePath}${docsPath.slice(1)}`);
   await expect(page.locator('#project-status')).toContainText('absent from the inspected commit');
   await expect(page.locator('#project-status')).toContainText('not yet runtime-verified');
@@ -31,9 +31,10 @@ test("landing content and verified examples are prerendered and readable without
   expect(requests[1]).toContain('Authorization: Bearer $UPLOAD_TOKEN');
   expect(requests[1]).toContain('Content-Length: $FILE_SIZE');
   expect(requests[1]).toContain('--data-binary "@$FILE"');
-  await expect(page.locator('#pipeline')).toContainText('Asset ready does not mean all processing is finished.');
-  await expect(page.locator('#pipeline').getByRole('heading', { name: 'Extract metadata', exact: true })).toBeVisible();
-  await expect(page.locator('#pipeline').getByRole('heading', { name: 'Generate thumbnail', exact: true })).toBeVisible();
+  await expect(page.locator('#product-preview')).toContainText('Ingestion complete does not mean processing is finished.');
+  await expect(page.locator('#product-preview')).toContainText('In development');
+  for(const name of ['Metadata','Thumbnail','Renditions']) await expect(page.locator('#product-preview').getByRole('heading',{name,exact:true})).toBeVisible();
+  await expect(page.getByRole('button',{name:'Play simulation'})).toHaveCount(0);
   await context.close();
 });
 
@@ -41,7 +42,7 @@ test("pipeline play/pause/replay preserves independent states and never calls an
   await page.clock.install();
   const unexpected: string[] = [];
   page.on('request', req => { if (!req.url().startsWith(home) || /\/v1\//.test(req.url())) unexpected.push(req.url()); });
-  await page.goto(basePath);
+  await page.goto(basePath+'docs/guides/processing/');
   const pipeline = page.locator('#pipeline');
   const values = pipeline.locator('.pipeline-states strong');
   await pipeline.getByRole('button', { name: 'Play simulation', exact: true }).click();
@@ -68,7 +69,7 @@ test("pipeline play/pause/replay preserves independent states and never calls an
 
 test("reduced motion offers the complete static flow and keyboard activation works", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto(basePath);
+  await page.goto(basePath+'docs/guides/processing/');
   const pipeline = page.locator('#pipeline');
   await expect(pipeline).toContainText('Reduced motion: static overview.');
   await expect(pipeline.getByRole('button', { name: 'Play simulation' })).toHaveCount(0);

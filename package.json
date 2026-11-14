@@ -12,7 +12,8 @@
     "preview": "node scripts/static-server.ts",
     "test": "node scripts/finalize-static.test.ts && node scripts/documentation.test.ts && playwright test",
     "check:docs": "node scripts/validate-docs.ts output",
-    "validate": "npm run typecheck && npm run build && npm test"
+    "validate": "npm run typecheck && npm run build && npm test",
+    "check:clerk": "node scripts/check-clerk.ts"
   },
   "dependencies": {
     "@clerk/react": "6.18.7",

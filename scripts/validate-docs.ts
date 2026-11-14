@@ -40,7 +40,7 @@ function validateLink(href:string,sourcePath:string,headings:Map<string,Set<stri
   const url=new URL(normalized,`https://docs.local${basePath}${sourcePath}/`);
   assert(url.pathname.startsWith(basePath),`Link escapes base: ${href}`);
   const path=url.pathname.slice(basePath.length).replace(/\/$/,'');
-  if(path==='') {if(url.hash)assert(['pipeline','capabilities','developer-experience','architecture','getting-started','project-status','main','hero-title'].includes(url.hash.slice(1)),`Broken home anchor: ${href}`);return;}
+  if(path==='') {if(url.hash)assert(['product-preview','playground','capabilities','developer-experience','architecture','getting-started','project-status','main','hero-title'].includes(url.hash.slice(1)),`Broken home anchor: ${href}`);return;}
   assert(headings.has(path),`Broken internal documentation link from ${sourcePath}: ${href}`);
   if(url.hash)assert(headings.get(path)!.has(decodeURIComponent(url.hash.slice(1))),`Broken heading anchor from ${sourcePath}: ${href}`);
 }

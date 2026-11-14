@@ -16,7 +16,7 @@ export default function AuthPoc() {
   <h1>Authentication compatibility POC</h1>
   <p>This isolated test uses Clerk for authentication. It does not connect to the Lumen API.</p>
   {!configured ? <p>Authentication is not configured. Public pages remain available.</p> : !mounted ? <p>Authentication loads in your browser.</p> :
-   <AuthBoundary><Suspense fallback={<p role="status">Loading authentication…</p>}><ClientAuth publishableKey={key!}/></Suspense></AuthBoundary>}
+   <AuthBoundary><Suspense fallback={<p role="status">Loading authentication…</p>}><ClientAuth/></Suspense></AuthBoundary>}
   <p><Link to="/docs/" className="text-link">Return to documentation</Link></p>
  </section>;
 }

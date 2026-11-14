@@ -57,7 +57,13 @@ test("search dialog supports keyboard, trapping, Escape and index failure recove
   await page.keyboard.press("Enter");
   const dialog = page.getByRole("dialog", { name: "Search documentation" });
   await expect(dialog).toBeVisible();
-  await expect(dialog.getByRole("searchbox")).toBeFocused();
+  const searchbox = dialog.getByRole("searchbox");
+  await expect(searchbox).toBeFocused();
+  await expect(searchbox).toHaveAttribute("placeholder", "Search guides, APIs, and more...");
+  await expect(dialog.getByRole("status")).toHaveText("Search across Lumen documentation.");
+  await expect(dialog.getByText("Start typing to find guides and API references.")).toBeVisible();
+  await expect(dialog.getByText("Powered by Pagefind")).toBeVisible();
+  await expect(dialog.getByText("to close")).toBeVisible();
   for (let index = 0; index < 7; index++) {
     await page.keyboard.press("Tab");
     expect(await page.evaluate(() => !!document.activeElement?.closest("dialog"))).toBe(true);
@@ -128,14 +134,17 @@ test("responsive shells reflow, contents links and reduced motion remain usable"
 
 test("WCAG automated checks in both themes, mobile menus and search", async ({ page }) => {
   await page.goto(installation);
+  const searchTrigger = page.getByRole("button", { name: "Search documentation", exact: true });
+  const searchDialog = page.getByRole("dialog", { name: "Search documentation" });
   for (const theme of ["light", "dark"]) {
     await page.getByRole("combobox", { name: "Theme", exact: true }).selectOption(theme);
-    const result = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
-    expect(result.violations).toEqual([]);
+    expect((await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze()).violations).toEqual([]);
+    await searchTrigger.click();
+    await expect(searchDialog).toBeVisible();
+    expect((await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze()).violations).toEqual([]);
+    await page.keyboard.press("Escape");
+    await expect(searchDialog).not.toBeVisible();
   }
-  await page.getByRole("button", { name: "Search documentation", exact: true }).click();
-  expect((await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze()).violations).toEqual([]);
-  await page.keyboard.press("Escape");
   await page.setViewportSize({ width: 375, height: 812 });
   for (const name of ["Open navigation", "Documentation menu"]) {
     await page.getByRole("button", { name }).click();

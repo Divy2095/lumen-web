@@ -11,7 +11,7 @@ const plainExcerpt = (value: string) => value.replace(/<[^>]*>/g, "");
 
 export function Search({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [results, setResults] = useState<Result[]>([]);
-  const [status, setStatus] = useState("Search guides and technical documentation.");
+  const [status, setStatus] = useState("Search across Lumen documentation.");
   const [busy, setBusy] = useState(false);
   const [query, setQuery] = useState("");
   const [failed, setFailed] = useState(false);
@@ -21,6 +21,15 @@ export function Search({ open, onClose }: { open: boolean; onClose: () => void }
     if (open) input.current?.focus();
     else { generation.current++; setBusy(false); }
   }, [open]);
+  function updateQuery(value: string) {
+    setQuery(value);
+    if (value.trim()) return;
+    generation.current++;
+    setResults([]);
+    setFailed(false);
+    setBusy(false);
+    setStatus("Search across Lumen documentation.");
+  }
   async function search(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const term = query.trim();
@@ -45,13 +54,16 @@ export function Search({ open, onClose }: { open: boolean; onClose: () => void }
     } finally { if (request === generation.current) setBusy(false); }
   }
   return <Modal open={open} onClose={onClose} title="Search documentation" className="search-modal">
-    <form onSubmit={search} className="search-form">
+    <form onSubmit={search} className="search-form" role="search">
       <label htmlFor="query" className="sr-only">Search documentation</label>
-      <SearchIcon aria-hidden="true" size={19} />
-      <input ref={input} id="query" name="query" type="search" placeholder="Search documentation…" value={query} onChange={event => setQuery(event.target.value)} autoComplete="off" required />
-      <Button type="submit" disabled={busy} variant="primary">{failed ? "Retry" : "Search"}</Button>
+      <SearchIcon aria-hidden="true" size={18} />
+      <input ref={input} id="query" name="query" type="search" placeholder="Search guides, APIs, and more..." value={query} onChange={event => updateQuery(event.target.value)} autoComplete="off" enterKeyHint="search" required />
+      <Button type="submit" disabled={busy} variant="ghost" className="search-submit">{failed ? "Retry" : "Search"}</Button>
     </form>
-    <p role="status" className="search-status">{status}</p>
+    <div className="search-summary">
+      <p role="status" className="search-status">{status}</p>
+      {!query.trim() && !results.length && !failed && !busy && <p className="search-hint">Start typing to find guides and API references.</p>}
+    </div>
     <ul className="search-results">{results.map(result => <li key={result.url}>
       <Link to={result.url.startsWith(basePath) ? `/${result.url.slice(basePath.length)}` : result.url} onClick={() => {
         onClose();
@@ -61,6 +73,6 @@ export function Search({ open, onClose }: { open: boolean; onClose: () => void }
       </Link>
     </li>)}</ul>
     {failed && <nav aria-label="Browse documentation" className="search-fallback">{documents.map(doc => <Link key={doc.path} to={`/${doc.path}/`} onClick={onClose}>{doc.title}</Link>)}</nav>}
-    <div className="search-footer"><span>Search by Pagefind</span><span><kbd>Esc</kbd> to close</span></div>
+    <div className="search-footer"><span>Powered by Pagefind</span><span><kbd>Esc</kbd> to close</span></div>
   </Modal>;
 }

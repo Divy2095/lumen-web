@@ -6,7 +6,7 @@ Treat ingestion, metadata and thumbnail state as independent concerns.
 
 Registration creates an asset in `uploading`. Successful ingestion commits `ready` alongside two queued jobs and their outbox events. A failed ingestion can become `failed`. The database also defines deletion states; no public deletion API was established in this revision.
 
-`ready` means the source was ingested. It can coexist with queued, processing or failed background work. The [landing-page simulation](/lumen-web/#pipeline) illustrates this separation without connecting to a backend.
+`ready` means the source was ingested. It can coexist with queued, processing or failed background work. The simulation below illustrates this separation without connecting to a backend.
 
 ## Independent worker jobs
 
@@ -23,3 +23,7 @@ The current response does not expose a generic job list or the full extracted me
 ## Failure inspection
 
 Use asset/thumbnail state plus separately authorized operator logs. Do not invent a public retry, cancellation, webhook or job-status route. Storage/worker failures can leave ingestion `ready` while thumbnail work fails. See [troubleshooting](/docs/guides/troubleshooting/).
+
+## Explore the flow
+
+<Pipeline />

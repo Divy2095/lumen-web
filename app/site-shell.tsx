@@ -1,3 +1,4 @@
+import { AccountControl } from "./auth/account";
 import { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router";
 import { ArrowUpRight, Menu, Search as SearchIcon } from "lucide-react";
@@ -35,6 +36,7 @@ export function Header({ onSearch }: { onSearch: () => void }) {
     <div className="header-controls">
       <Button className="search-trigger" variant="ghost" onClick={onSearch} aria-label="Search documentation" aria-haspopup="dialog"><SearchIcon size={17} aria-hidden="true" /><span>Search docs</span><kbd aria-hidden="true">⌘ / Ctrl K</kbd></Button>
       <ThemeControl />
+      <AccountControl />
       <Button variant="ghost" className="icon-button mobile-menu-trigger" onClick={() => setOpen(true)} aria-label="Open navigation" aria-haspopup="dialog" aria-expanded={open}><Menu size={20} aria-hidden="true" /></Button>
     </div>
   </div>

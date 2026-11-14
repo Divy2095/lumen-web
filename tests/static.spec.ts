@@ -68,10 +68,13 @@ test("Pagefind returns real documentation and excludes site chrome",async({page}
   await page.getByRole('button',{name:'Search documentation',exact:true}).click();
   const dialog=page.getByRole('dialog',{name:'Search documentation'});
   await dialog.getByRole('searchbox').fill('Content-Length');
-  await dialog.getByRole('button',{name:'Search',exact:true}).click();
+  await dialog.getByRole('searchbox').press('Enter');
   await expect(dialog.locator('li a').first()).toBeVisible();
   for(const link of await dialog.locator('li a').all())await expect(link).toHaveAttribute('href',/^\/lumen-web\/docs\//);
-  await dialog.locator('li a').first().click();
+  const firstResult=dialog.locator('li a').first();
+  await firstResult.focus();
+  await expect(firstResult).toBeFocused();
+  await page.keyboard.press('Enter');
   await expect(page.locator('article')).toContainText('Content-Length');
   await page.getByRole('button',{name:'Search documentation',exact:true}).click();
   await dialog.getByRole('searchbox').fill('"Website source"');
