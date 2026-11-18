@@ -10,7 +10,8 @@
     "typecheck": "react-router typegen && tsc --noEmit",
     "build": "node scripts/validate-docs.ts source && react-router build && node scripts/finalize-static.ts && pagefind --site build/client --root-selector article --force-language en && node scripts/validate-docs.ts output",
     "preview": "node scripts/static-server.ts",
-    "test": "node scripts/finalize-static.test.ts && node scripts/documentation.test.ts && playwright test",
+    "test": "node scripts/finalize-static.test.ts && node scripts/documentation.test.ts && npm run test:playground && playwright test",
+    "test:playground": "node scripts/playground.test.ts && node scripts/playground-browser.test.ts",
     "check:docs": "node scripts/validate-docs.ts output",
     "validate": "npm run typecheck && npm run build && npm test",
     "check:clerk": "node scripts/check-clerk.ts"

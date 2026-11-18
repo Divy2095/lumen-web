@@ -145,6 +145,11 @@
 .playground-dialog-body { padding: 1.5rem; }
 .playground-dialog-body p { margin-bottom: 1.25rem; }
 .playground-dialog-body > button { margin-top: 1rem; }
+.playground-processing [role="alert"] { color: var(--error); overflow-wrap: anywhere; }
+.playground-metadata { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr)); gap: 1rem; margin-block: 1.5rem; }
+.playground-metadata dt { color: var(--secondary); font-size: .875rem; }
+.playground-metadata dd { margin: .25rem 0 0; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.playground-thumbnail { display: block; width: 100%; height: auto; max-height: 22rem; object-fit: contain; margin-block: 1.5rem; }
 
 .output-panel { border: 1px solid var(--border); border-radius: .375rem; background: var(--surface); }
 .output-toolbar { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:1rem 1.5rem; border-bottom:1px solid var(--border); }

@@ -38,7 +38,7 @@ function DeveloperExperience() {
   return <section className="landing-section developer-section" id="developer-experience" aria-labelledby="developer-title">
     <div className="section-heading"><div><p className="section-index">03 / Developer experience</p><h2 id="developer-title">Two steps.<br />Two different credentials.</h2></div><p>First, your application registers the upload. Then the file is sent using its own upload token. Your project key stays on your server.</p></div>
     <ApiExample components={{ pre: CodeBlock }} />
-    <p className="source-note">Examples checked against <a href={`${githubUrl}/blob/4899210e659864a2026b13b7d3c558e92da08780/src/modules/media/media.service.ts`}>committed source <code>4899210</code><ArrowUpRight size={12} aria-hidden="true" /></a>. Values are illustrative; this website does not make API requests. See current setup limitations below.</p>
+    <p className="source-note">Examples checked against <a href={`${githubUrl}/blob/4899210e659864a2026b13b7d3c558e92da08780/src/modules/media/media.service.ts`}>committed source <code>4899210</code><ArrowUpRight size={12} aria-hidden="true" /></a>. These examples are illustrative, not executable. The separate playground uses the local Phase 8C browser API.</p>
   </section>;
 }
 
